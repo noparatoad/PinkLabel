@@ -83,7 +83,7 @@
     <div class="card mb-3">
         <div class="header-bg p-3 p-md-4">
             <h2 class="mb-1 fw-bold">📋 จัดแผนผังและซองข้อสอบ</h2>
-            <p class="mb-0 opacity-75 small">คำนวณจำนวนข้อสอบในแต่ละแถว และระบุแถวลงซองข้อสอบ</p>
+            <p class="mb-0 opacity-75 small">คำนวณจำนวนข้อสอบในแต่ละแถว และระบุแถวลงซองข้อสอบ (ไม่แยกแถว)</p>
         </div>
         <div class="card-body p-3 p-md-4">
             <form id="calcForm">
@@ -131,7 +131,7 @@
                         <input type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="pagesPerCopy" min="1" max="500" placeholder="ระบุจำนวนแผ่น" required>
                     </div>
                     <div class="col-12">
-                        <div class="form-text text-danger fw-bold small mt-0">* ซองข้อสอบ 1 ซอง บรรจุได้สูงสุด 500 แผ่น</div>
+                        <div class="form-text text-danger fw-bold small mt-0">* ซองข้อสอบ 1 ซอง บรรจุไม่เกิน 500 แผ่น (จัดเต็มแถว ไม่แยกซอง)</div>
                     </div>
                 </div>
 
@@ -144,11 +144,11 @@
         </div>
     </div>
 
-    <!-- ส่วนแสดงผลลัพธ์ -->
-    <div id="resultSection" style="display: none;">
-        <!-- แถบแจ้งเตือนสถานะการดึงข้อมูล -->
-        <div id="dataSourceStatus" class="alert alert-info py-2 px-3 small mb-2 rounded-3"></div>
+    <!-- แถบแจ้งเตือนสถานะการดึงข้อมูล (แสดงตลอดเมื่อกดคำนวณ) -->
+    <div id="dataSourceStatus" style="display: none;"></div>
 
+    <!-- ส่วนแสดงผลลัพธ์ (จะซ่อนทันทีหากโหลดข้อมูลไม่สำเร็จ) -->
+    <div id="resultSection" style="display: none;">
         <!-- แจ้งเตือนกรณีที่นั่งไม่พอ -->
         <div id="alertUnassigned" class="alert alert-danger py-2 px-3 small mb-2 rounded-3" style="display: none;"></div>
 
@@ -175,7 +175,7 @@
             </div>
         </div>
 
-        <!-- รายละเอียดการจัดซองข้อสอบ (ใหม่!) -->
+        <!-- รายละเอียดการจัดซองข้อสอบ -->
         <div class="card mb-3 p-3 p-md-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
                 <h6 class="fw-bold mb-0">✉️ รายละเอียดการบรรจุซองข้อสอบ</h6>
@@ -184,7 +184,7 @@
             <div class="row row-cols-1 row-cols-md-2 g-2 mt-1" id="envelopeMap"></div>
         </div>
 
-        <!-- แผนผังจำลอง (แสดงเฉพาะแถวที่ใช้) -->
+        <!-- แผนผังจำลอง -->
         <div class="card mb-3 p-3 p-md-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
                 <h6 class="fw-bold mb-1">🗺️ แผนผังแถวที่ต้องวางข้อสอบ</h6>
@@ -196,7 +196,7 @@
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2" id="visualMap"></div>
         </div>
 
-        <!-- ตารางรายละเอียด (แสดงเฉพาะแถวที่ใช้) -->
+        <!-- ตารางรายละเอียด -->
         <div class="card p-3 p-md-4 mb-4">
             <h6 class="fw-bold mb-2">📑 ตารางสรุปการวางข้อสอบในแต่ละแถว</h6>
             <div class="table-responsive">
@@ -223,34 +223,7 @@
     // ตั้งค่าการดึงข้อมูลจาก Google Sheets
     // ==========================================
     const GOOGLE_SHEET_ID = "1MFl2071MfgFMbEYDytGoPsw1Dx9d5tJxx3V9R_Bvcf4"; 
-    const MAX_PAGES_PER_ENVELOPE = 500; // กำหนดความจุ 500 แผ่น/ซอง
-
-    const mockRoomData = {
-        "5406": [
-            { row: "1", capacity: 15 }, { row: "2", capacity: 15 }, { row: "3", capacity: 15 },
-            { row: "4", capacity: 15 }, { row: "5", capacity: 15 }, { row: "6", capacity: 15 },
-            { row: "แถวเสริม 1", capacity: 10 }, { row: "แถวเสริม 2", capacity: 10 }
-        ],
-        "หอประชุม": [
-            { row: "1", capacity: 30 }, { row: "2", capacity: 30 }, { row: "3", capacity: 30 },
-            { row: "4", capacity: 30 }, { row: "5", capacity: 30 }, { row: "6", capacity: 30 },
-            { row: "7", capacity: 30 }, { row: "8", capacity: 30 }, { row: "9", capacity: 30 },
-            { row: "10", capacity: 30 }, { row: "แถวเสริม 1", capacity: 25 }, { row: "แถวเสริม 2", capacity: 25 }
-        ],
-        "รวท1": [
-            { row: "1", capacity: 12 }, { row: "2", capacity: 12 }, { row: "3", capacity: 12 },
-            { row: "4", capacity: 12 }, { row: "5", capacity: 12 }, { row: "แถวเสริม 1", capacity: 8 }
-        ],
-        "รวท2": [
-            { row: "1", capacity: 12 }, { row: "2", capacity: 12 }, { row: "3", capacity: 12 },
-            { row: "4", capacity: 12 }, { row: "5", capacity: 12 }, { row: "แถวเสริม 2", capacity: 8 }
-        ],
-        "ไววิทย์พุทธารี": [
-            { row: "1", capacity: 25 }, { row: "2", capacity: 25 }, { row: "3", capacity: 25 },
-            { row: "4", capacity: 25 }, { row: "5", capacity: 25 }, { row: "6", capacity: 25 },
-            { row: "แถวเสริม 1", capacity: 15 }, { row: "แถวเสริม 2", capacity: 15 }
-        ]
-    };
+    const MAX_PAGES_PER_ENVELOPE = 500;
 
     function togglePatternOptions() {
         const examSets = document.getElementById('examSets').value;
@@ -266,8 +239,8 @@
     function getRowParity(rowName) {
         rowName = String(rowName).trim();
         if (rowName.includes("เสริม") || rowName.includes("พิเศษ")) {
-            if (rowName.includes("1")) return "even";
-            if (rowName.includes("2")) return "odd";
+            if (rowName.includes("1")) return "even"; // แถวเสริม 1 = คู่
+            if (rowName.includes("2")) return "odd";  // แถวเสริม 2 = คี่
             return "even";
         }
         const num = parseInt(rowName.replace(/\D/g, ''));
@@ -277,26 +250,48 @@
         return "odd";
     }
 
+    // ดึงข้อมูล CSV จาก Google Sheet พร้อมระบบกู้คืนชื่อ "แถวเสริม"
     async function fetchSheetDataCSV(sheetId, sheetName) {
+        if (!sheetId || sheetId.trim() === "") {
+            throw new Error("ไม่ได้ระบุรหัส Google Sheet ID ในระบบ");
+        }
+
         const url = `https://docs.google.com/spreadsheets/d/${sheetId.trim()}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
         const response = await fetch(url);
+        
         if (!response.ok) {
-            throw new Error('ไม่สามารถเชื่อมต่อกับ Google Sheet ได้');
+            throw new Error(`เชื่อมต่อล้มเหลว (HTTP ${response.status}) กรุณาตรวจสอบสิทธิ์การแชร์ไฟล์`);
         }
+
         const csvText = await response.text();
+        
+        // ดักจับกรณี Google ส่งหน้าเว็บ Error กลับมาแทนที่จะเป็น CSV
+        if (csvText.trim().startsWith("<!DOCTYPE html>") || csvText.includes("<html")) {
+            throw new Error(`ตั้งค่าการแชร์ไฟล์ไม่ถูกต้อง หรือไม่พบชีทชื่อ "${sheetName}"`);
+        }
+
         const lines = csvText.split(/\r?\n/);
         const rows = [];
+        let extraRowCounter = 1;
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
+            
             const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
             if (parts.length >= 2) {
-                const rName = parts[0];
+                let rName = parts[0];
                 const cap = parseInt(parts[1]);
-                if (rName !== '' && rName !== 'แถว' && !isNaN(cap)) {
-                    rows.push({ row: rName, capacity: cap });
+
+                // ข้ามบรรทัดหัวตาราง
+                if (isNaN(cap)) continue;
+
+                // หาก Google ลบข้อความคำว่า "แถวเสริม" ทิ้งจนว่างเปล่า ให้สร้างชื่อขึ้นมาใหม่
+                if (rName === '' || rName.toLowerCase() === 'null') {
+                    rName = `แถวเสริม ${extraRowCounter++}`;
                 }
+
+                rows.push({ row: rName, capacity: cap });
             }
         }
         return rows;
@@ -304,29 +299,30 @@
 
     async function getRoomData(roomName) {
         const statusBox = document.getElementById('dataSourceStatus');
-
-        if (!GOOGLE_SHEET_ID) {
-            statusBox.className = "alert alert-warning py-2 px-3 small mb-2 rounded-3";
-            statusBox.innerHTML = `⚠️ <strong>โหมดข้อมูลจำลอง:</strong> ไม่ได้ระบุ Sheet ID`;
-            return mockRoomData[roomName] || [];
-        }
+        statusBox.style.display = 'block';
         
         try {
             const rows = await fetchSheetDataCSV(GOOGLE_SHEET_ID, roomName);
-            if (rows.length === 0) throw new Error(`ไม่พบข้อมูลในชีท "${roomName}"`);
+            if (rows.length === 0) {
+                throw new Error(`ไม่พบข้อมูลแถวและความจุในชีท "${roomName}"`);
+            }
 
             const extraRows = rows.filter(r => r.row.includes("เสริม")).map(r => r.row);
-            const extraText = extraRows.length > 0 ? ` (รวม ${extraRows.join(', ')})` : '';
+            const extraText = extraRows.length > 0 ? ` <span class="badge bg-success ms-1">พบ ${extraRows.join(', ')}</span>` : '';
 
-            statusBox.className = "alert alert-success py-2 px-3 small mb-2 rounded-3";
-            statusBox.innerHTML = `✅ ดึงข้อมูลสำเร็จ: <strong>ห้อง ${roomName}</strong> มีทั้งหมด ${rows.length} แถว${extraText}`;
+            statusBox.className = "alert alert-success py-2 px-3 small mb-3 rounded-3 shadow-sm";
+            statusBox.innerHTML = `✅ ดึงข้อมูลสำเร็จ: <strong>ห้อง ${roomName}</strong> มีทั้งหมด ${rows.length} แถว ${extraText}`;
             return rows;
 
         } catch (error) {
             console.error(error);
-            statusBox.className = "alert alert-danger py-2 px-3 small mb-2 rounded-3";
-            statusBox.innerHTML = `❌ <strong>ดึงข้อมูลชีท "${roomName}" ไม่ได้:</strong> ${error.message} <em>(ใช้ข้อมูลจำลองแทน)</em>`;
-            return mockRoomData[roomName] || [];
+            statusBox.className = "alert alert-danger py-3 px-3 mb-3 rounded-3 shadow-sm";
+            statusBox.innerHTML = `
+                <h6 class="fw-bold mb-1">❌ ไม่สามารถดึงข้อมูลจาก Google Sheet ได้</h6>
+                <div class="small"><strong>สาเหตุ:</strong> ${error.message}</div>
+                <div class="small mt-1 text-muted">กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต, ชื่อแท็บชีทในไฟล์ต้นฉบับ หรือการตั้งค่าแชร์ไฟล์เป็น "ทุกคนที่มีลิงก์ดูได้"</div>
+            `;
+            return null; // คืนค่า null เพื่อหยุดการทำงานทันที
         }
     }
 
@@ -342,7 +338,7 @@
 
         const calcBtn = document.getElementById('calcBtn');
         calcBtn.disabled = true;
-        calcBtn.innerText = "⏳ กำลังคำนวณ...";
+        calcBtn.innerText = "⏳ กำลังดึงข้อมูลและคำนวณ...";
 
         const roomName = document.getElementById('roomSelect').value;
         const examSets = parseInt(document.getElementById('examSets').value);
@@ -353,6 +349,13 @@
         
         calcBtn.disabled = false;
         calcBtn.innerText = "คำนวณการจัดที่นั่งและซองข้อสอบ";
+
+        // หากโหลดข้อมูลไม่สำเร็จ ให้ซ่อนผลลัพธ์และหยุดทำงานทันที
+        if (!roomData) {
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('dataSourceStatus').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
 
         let remainingStudents = totalStudents;
         let usedRowsCount = 0;
@@ -394,23 +397,25 @@
                 assigned: assigned,
                 pages: assigned * pagesPerCopy,
                 setNumber: assigned > 0 ? (examSet === "ชุด 1" ? 1 : 2) : 0,
-                envelopesUsed: [] // เก็บข้อมูลว่าแถวนี้อยู่ในซองไหนบ้าง
+                envelopesUsed: []
             };
         });
 
-        // 2. คำนวณการบรรจุลงซอง (1 ซอง ไม่เกิน 500 แผ่น และไม่ฉีกชุดข้อสอบแยกซอง)
+        // 2. คำนวณการบรรจุลงซอง (ห้ามแยกข้อสอบในแถวเดียวกันคนละซอง และซองละไม่เกิน 500 แผ่น)
         const maxCopiesPerEnvelope = Math.floor(MAX_PAGES_PER_ENVELOPE / pagesPerCopy);
         let envelopesList = [];
         let globalEnvCounter = 1;
 
-        function packRowsIntoEnvelopes(rowsToPack, setNumber) {
+        function packRowsIntoEnvelopesNoSplit(rowsToPack, setNumber) {
             let currentEnv = null;
 
             rowsToPack.forEach(row => {
-                let copiesLeftToPack = row.assigned;
+                const rowPages = row.assigned * pagesPerCopy;
 
-                while (copiesLeftToPack > 0) {
-                    if (!currentEnv || currentEnv.copies >= maxCopiesPerEnvelope) {
+                // กรณีปกติ: กระดาษทั้งแถวรวมกัน ไม่เกิน 500 แผ่น
+                if (rowPages <= MAX_PAGES_PER_ENVELOPE) {
+                    // ถ้าใส่ซองเดิมแล้วเกิน 500 แผ่น ให้เปิดซองใหม่ทันที
+                    if (!currentEnv || (currentEnv.pages + rowPages) > MAX_PAGES_PER_ENVELOPE) {
                         currentEnv = {
                             envNo: globalEnvCounter++,
                             setNumber: setNumber,
@@ -422,34 +427,60 @@
                         envelopesList.push(currentEnv);
                     }
 
-                    let spaceLeftInEnv = maxCopiesPerEnvelope - currentEnv.copies;
-                    let takeCopies = Math.min(copiesLeftToPack, spaceLeftInEnv);
-
-                    currentEnv.copies += takeCopies;
-                    currentEnv.pages += takeCopies * pagesPerCopy;
+                    currentEnv.copies += row.assigned;
+                    currentEnv.pages += rowPages;
                     currentEnv.items.push({
                         rowName: row.rowName,
-                        copies: takeCopies,
-                        pages: takeCopies * pagesPerCopy,
-                        isSplit: takeCopies < row.assigned // เช็คว่าแถวนี้ถูกแบ่งซองหรือไม่
+                        copies: row.assigned,
+                        pages: rowPages,
+                        isOversizeSplit: false
                     });
 
                     row.envelopesUsed.push({
                         envNo: currentEnv.envNo,
-                        copies: takeCopies
+                        copies: row.assigned
                     });
 
-                    copiesLeftToPack -= takeCopies;
+                } else {
+                    // กรณีฉุกเฉิน: แถวเดียวมีกระดาษเกิน 500 แผ่น จึงจำเป็นต้องแบ่งซอง
+                    let copiesLeft = row.assigned;
+                    while (copiesLeft > 0) {
+                        currentEnv = {
+                            envNo: globalEnvCounter++,
+                            setNumber: setNumber,
+                            examSet: `ชุดที่ ${setNumber}`,
+                            copies: 0,
+                            pages: 0,
+                            items: []
+                        };
+                        envelopesList.push(currentEnv);
+
+                        let takeCopies = Math.min(copiesLeft, maxCopiesPerEnvelope);
+                        currentEnv.copies += takeCopies;
+                        currentEnv.pages += takeCopies * pagesPerCopy;
+                        currentEnv.items.push({
+                            rowName: row.rowName,
+                            copies: takeCopies,
+                            pages: takeCopies * pagesPerCopy,
+                            isOversizeSplit: true
+                        });
+
+                        row.envelopesUsed.push({
+                            envNo: currentEnv.envNo,
+                            copies: takeCopies
+                        });
+
+                        copiesLeft -= takeCopies;
+                    }
                 }
             });
         }
 
-        // แยกบรรจุซองตามชุดข้อสอบ (ชุดที่ 1 และ ชุดที่ 2 แยกซองกันชัดเจน)
         const activeRowsSet1 = allocationResult.filter(r => r.assigned > 0 && r.setNumber === 1);
         const activeRowsSet2 = allocationResult.filter(r => r.assigned > 0 && r.setNumber === 2);
 
-        if (activeRowsSet1.length > 0) packRowsIntoEnvelopes(activeRowsSet1, 1);
-        if (activeRowsSet2.length > 0) packRowsIntoEnvelopes(activeRowsSet2, 2);
+        if (activeRowsSet1.length > 0) packRowsIntoEnvelopesNoSplit(activeRowsSet1, 1);
+        if (activeRowsSet2.length > 0) packRowsIntoEnvelopesNoSplit(activeRowsSet2, 2);
 
         const envSet1Count = envelopesList.filter(e => e.setNumber === 1).length;
         const envSet2Count = envelopesList.filter(e => e.setNumber === 2).length;
@@ -494,7 +525,7 @@
         }
 
         // แสดงรายละเอียดการจัดซองข้อสอบ
-        document.getElementById('maxCopiesPerEnvText').innerText = `(ใส่ได้สูงสุด ${data.maxCopiesPerEnvelope} ชุด หรือ ${data.maxCopiesPerEnvelope * data.pagesPerCopy} แผ่น/ซอง)`;
+        document.getElementById('maxCopiesPerEnvText').innerText = `(จัดแบบเต็มแถว ไม่เกิน 500 แผ่น/ซอง)`;
         const envelopeMap = document.getElementById('envelopeMap');
         envelopeMap.innerHTML = '';
 
@@ -504,10 +535,10 @@
 
             let itemsHtml = env.items.map(item => {
                 const dispRow = item.rowName.includes("แถว") ? item.rowName : `แถว ${item.rowName}`;
-                const splitBadge = item.isSplit ? `<span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem;">แบ่งซอง</span>` : '';
+                const splitWarn = item.isOversizeSplit ? `<span class="badge bg-danger ms-1" style="font-size:0.65rem;">แถวเดียวเกิน 500 แผ่น</span>` : '';
                 return `
                     <li class="list-group-item d-flex justify-content-between align-items-center px-2 py-1 bg-transparent border-bottom-0">
-                        <div>• <strong>${dispRow}</strong> ${splitBadge}</div>
+                        <div>• <strong>${dispRow}</strong> ${splitWarn}</div>
                         <span class="text-dark fw-bold">${item.copies} ชุด <small class="text-muted fw-normal">(${item.pages} แผ่น)</small></span>
                     </li>
                 `;
@@ -516,15 +547,17 @@
             envelopeMap.innerHTML += `
                 <div class="col">
                     <div class="card bg-light h-100 ${cardBorder} shadow-sm">
-                        <div class="card-body p-2 p-md-3">
-                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                                <h6 class="fw-bold mb-0 text-dark">✉️ ซองที่ ${env.envNo}</h6>
-                                <span class="badge ${badgeClass}">${env.examSet}</span>
+                        <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                    <h6 class="fw-bold mb-0 text-dark">✉️ ซองที่ ${env.envNo}</h6>
+                                    <span class="badge ${badgeClass}">${env.examSet}</span>
+                                </div>
+                                <ul class="list-group list-group-flush small mb-2">
+                                    ${itemsHtml}
+                                </ul>
                             </div>
-                            <ul class="list-group list-group-flush small mb-2">
-                                ${itemsHtml}
-                            </ul>
-                            <div class="text-end bg-white p-2 rounded border small">
+                            <div class="text-end bg-white p-2 rounded border small mt-2">
                                 รวมบรรจุ: <strong class="text-primary fs-6">${env.copies} ชุด</strong> 
                                 <span class="text-muted">(${env.pages}/500 แผ่น)</span>
                             </div>
@@ -547,15 +580,14 @@
             let badgeClass = r.setNumber === 1 ? 'badge-set1' : 'badge-set2';
             const displayRowName = r.rowName.includes("แถว") ? r.rowName : `แถว ${r.rowName}`;
 
-            // สร้างข้อความระบุซองของแต่ละแถว
             const envBadges = r.envelopesUsed.map(e => {
                 if (r.envelopesUsed.length > 1) {
-                    return `<span class="badge bg-secondary mb-1 d-inline-block">ซอง ${e.envNo} (${e.copies} ชุด)</span>`;
+                    return `<span class="badge bg-danger mb-1 d-inline-block">ซอง ${e.envNo} (${e.copies} ชุด)</span>`;
                 }
                 return `<span class="badge bg-dark">ซองที่ ${e.envNo}</span>`;
             }).join('');
 
-            const envTextShort = r.envelopesUsed.map(e => `ซอง ${e.envNo}`).join(', ');
+            const envTextShort = r.envelopesUsed.map(e => `ซองที่ ${e.envNo}`).join(', ');
 
             visualMap.innerHTML += `
                 <div class="col">
@@ -563,7 +595,7 @@
                         <div class="fw-bold small mb-1">${displayRowName}</div>
                         <div><span class="badge ${badgeClass} mb-1">${r.examSet}</span></div>
                         <div class="fs-5 fw-bold lh-1 my-1">${r.assigned} <span class="small fw-normal text-muted">/${r.capacity}</span></div>
-                        <div class="text-muted" style="font-size: 0.7rem;">(${envTextShort})</div>
+                        <div class="text-dark fw-semibold" style="font-size: 0.75rem;">[${envTextShort}]</div>
                     </div>
                 </div>
             `;
@@ -581,7 +613,7 @@
         });
 
         setTimeout(() => {
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('dataSourceStatus').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
     }
 </script>

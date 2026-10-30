@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบคำนวณและจัดแผนผังข้อสอบ</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f2f5;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .card {
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: none;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+        .form-select, .form-control {
+            padding: 0.65rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+        .row-box {
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            background-color: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .row-set-1 {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+        .row-set-2 {
+            border-color: #fd7e14;
+            background-color: #fff3cd;
+        }
+        .badge-set1 { background-color: #0d6efd; }
+        .badge-set2 { background-color: #fd7e14; }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .header-bg h2 {
+                font-size: 1.35rem;
+            }
+            .summary-box h3 {
+                font-size: 1.25rem;
+            }
+            .summary-box h6 {
+                font-size: 0.75rem;
+            }
+            .table-mobile {
+                font-size: 0.85rem;
+            }
+            .table-mobile th, .table-mobile td {
+                padding: 0.5rem 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-2 py-md-4">
+    <div class="card mb-3">
+        <div class="header-bg p-3 p-md-4">
+            <h2 class="mb-1 fw-bold">📋 จัดแผนผังข้อสอบ</h2>
+            <p class="mb-0 opacity-75 small">คำนวณจำนวนข้อสอบในแต่ละแถว และจำนวนซอง</p>
+        </div>
+        <div class="card-body p-3 p-md-4">
+            <form id="calcForm">
+                <div class="row g-2 g-md-3">
+                    <!-- เลือกห้องสอบ -->
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-bold mb-1">1. เลือกห้องสอบ</label>
+                        <select class="form-select" id="roomSelect" required>
+                            <option value="5406">5406 ว.4</option>
+                            <option value="หอประชุม">หอประชุม</option>
+                            <option value="รวท1">ร.วท.1</option>
+                            <option value="รวท2">ร.วท.2</option>
+                            <option value="ไววิทย์พุทธารี">ไววิทย์พุทธารี</option>
+                        </select>
+                    </div>
+
+                    <!-- จำนวนชุดข้อสอบ -->
+                    <div class="col-6 col-md-4">
+                        <label class="form-label fw-bold mb-1">2. จำนวนชุด</label>
+                        <select class="form-select" id="examSets" onchange="togglePatternOptions()">
+                            <option value="1">1 ชุด</option>
+                            <option value="2">2 ชุด (คี่/คู่)</option>
+                        </select>
+                    </div>
+
+                    <!-- รูปแบบการจัดแถว -->
+                    <div class="col-6 col-md-4">
+                        <label class="form-label fw-bold mb-1">3. การจัดลงแถว</label>
+                        <select class="form-select" id="rowPattern">
+                            <option value="all">ทุกแถว</option>
+                            <option value="odd">เฉพาะแถวคี่</option>
+                            <option value="even">เฉพาะแถวคู่</option>
+                        </select>
+                    </div>
+
+                    <!-- จำนวนนักศึกษา -->
+                    <div class="col-6 col-md-6 mt-2 mt-md-3">
+                        <label class="form-label fw-bold mb-1">4. จำนวนนักศึกษา</label>
+                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="studentCount" min="1" placeholder="ระบุจำนวนคน" required>
+                    </div>
+
+                    <!-- จำนวนหน้าต่อชุด -->
+                    <div class="col-6 col-md-6 mt-2 mt-md-3">
+                        <label class="form-label fw-bold mb-1">5. จำนวนแผ่น/ชุด</label>
+                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="form-control" id="pagesPerCopy" min="1" placeholder="ระบุจำนวนแผ่น" required>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-text text-muted small mt-0">* ซองข้อสอบ 1 ซอง บรรจุได้สูงสุด 600 แผ่น</div>
+                    </div>
+                </div>
+
+                <div class="mt-3 mt-md-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold rounded-3 shadow-sm" id="calcBtn">
+                        คำนวณการจัดที่นั่งสอบ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ส่วนแสดงผลลัพธ์ -->
+    <div id="resultSection" style="display: none;">
+        <!-- แถบแจ้งเตือนสถานะการดึงข้อมูล -->
+        <div id="dataSourceStatus" class="alert alert-info py-2 px-3 small mb-2 rounded-3"></div>
+
+        <!-- แจ้งเตือนกรณีที่นั่งไม่พอ -->
+        <div id="alertUnassigned" class="alert alert-danger py-2 px-3 small mb-2 rounded-3" style="display: none;"></div>
+
+        <!-- สรุปผลรวม -->
+        <div class="row g-2 mb-3 summary-box">
+            <div class="col-4">
+                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
+                    <h6 class="text-muted mb-1">แถวที่ใช้</h6>
+                    <h3 class="fw-bold text-primary mb-0" id="sumRows">0/0</h3>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
+                    <h6 class="text-muted mb-1">จัดที่นั่งได้</h6>
+                    <h3 class="fw-bold text-success mb-0" id="sumStudents">0</h3>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
+                    <h6 class="text-muted mb-1">ใช้ซองข้อสอบ</h6>
+                    <h3 class="fw-bold text-danger mb-0" id="sumEnvelopes">0</h3>
+                    <small id="envelopeDetail" class="text-muted" style="font-size: 0.7rem;"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- แผนผังจำลอง (แสดงเฉพาะแถวที่ใช้) -->
+        <div class="card mb-3 p-3 p-md-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                <h6 class="fw-bold mb-1">🗺️ แถวที่ต้องวางข้อสอบ</h6>
+                <div>
+                    <span class="badge badge-set1 me-1">ชุดที่ 1</span>
+                    <span class="badge badge-set2" id="legendSet2" style="display:none;">ชุดที่ 2</span>
+                </div>
+            </div>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2" id="visualMap"></div>
+        </div>
+
+        <!-- ตารางรายละเอียด (แสดงเฉพาะแถวที่ใช้) -->
+        <div class="card p-3 p-md-4 mb-4">
+            <h6 class="fw-bold mb-2">📑 ตารางสรุปเฉพาะแถวที่ใช้</h6>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center align-middle mb-0 table-mobile">
+                    <thead class="table-light">
+                        <tr>
+                            <th>แถว</th>
+                            <th>ประเภท</th>
+                            <th>ชุด</th>
+                            <th class="table-primary">วางข้อสอบ (ชุด)</th>
+                            <th>กระดาษ (แผ่น)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // ตั้งค่าการดึงข้อมูลจาก Google Sheets
+    // ==========================================
+    const GOOGLE_SHEET_ID = "1MFl2071MfgFMbEYDytGoPsw1Dx9d5tJxx3V9R_Bvcf4"; 
+
+    const mockRoomData = {
+        "5406": [
+            { row: "1", capacity: 15 }, { row: "2", capacity: 15 }, { row: "3", capacity: 15 },
+            { row: "4", capacity: 15 }, { row: "5", capacity: 15 }, { row: "6", capacity: 15 },
+            { row: "แถวเสริม 1", capacity: 10 }, { row: "แถวเสริม 2", capacity: 10 }
+        ],
+        "หอประชุม": [
+            { row: "1", capacity: 30 }, { row: "2", capacity: 30 }, { row: "3", capacity: 30 },
+            { row: "4", capacity: 30 }, { row: "5", capacity: 30 }, { row: "6", capacity: 30 },
+            { row: "7", capacity: 30 }, { row: "8", capacity: 30 }, { row: "9", capacity: 30 },
+            { row: "10", capacity: 30 }, { row: "แถวเสริม 1", capacity: 25 }, { row: "แถวเสริม 2", capacity: 25 }
+        ],
+        "รวท1": [
+            { row: "1", capacity: 12 }, { row: "2", capacity: 12 }, { row: "3", capacity: 12 },
+            { row: "4", capacity: 12 }, { row: "5", capacity: 12 }, { row: "แถวเสริม 1", capacity: 8 }
+        ],
+        "รวท2": [
+            { row: "1", capacity: 12 }, { row: "2", capacity: 12 }, { row: "3", capacity: 12 },
+            { row: "4", capacity: 12 }, { row: "5", capacity: 12 }, { row: "แถวเสริม 2", capacity: 8 }
+        ],
+        "ไววิทย์พุทธารี": [
+            { row: "1", capacity: 25 }, { row: "2", capacity: 25 }, { row: "3", capacity: 25 },
+            { row: "4", capacity: 25 }, { row: "5", capacity: 25 }, { row: "6", capacity: 25 },
+            { row: "แถวเสริม 1", capacity: 15 }, { row: "แถวเสริม 2", capacity: 15 }
+        ]
+    };
+
+    function togglePatternOptions() {
+        const examSets = document.getElementById('examSets').value;
+        const rowPattern = document.getElementById('rowPattern');
+        if (examSets === "2") {
+            rowPattern.value = "all";
+            rowPattern.disabled = true;
+        } else {
+            rowPattern.disabled = false;
+        }
+    }
+
+    function getRowParity(rowName) {
+        rowName = String(rowName).trim();
+        if (rowName.includes("เสริม")) {
+            if (rowName.includes("1")) return "even";
+            if (rowName.includes("2")) return "odd";
+        }
+        const num = parseInt(rowName.replace(/\D/g, ''));
+        if (!isNaN(num)) {
+            return (num % 2 === 0) ? "even" : "odd";
+        }
+        return "odd";
+    }
+
+    function fetchSheetDataJSONP(sheetId, sheetName) {
+        return new Promise((resolve, reject) => {
+            const callbackName = 'gvizCallback_' + Math.round(100000 * Math.random());
+            
+            window[callbackName] = function(response) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                
+                if (response.status === 'error') {
+                    reject(new Error(response.errors[0]?.detailed_message || 'ไม่พบชีท หรือข้อมูลผิดพลาด'));
+                    return;
+                }
+                
+                const rows = [];
+                if (response.table && response.table.rows) {
+                    response.table.rows.forEach(r => {
+                        if (r.c && r.c[0] && r.c[1]) {
+                            const rName = String(r.c[0].f || r.c[0].v || '').trim();
+                            const cap = parseInt(r.c[1].v);
+                            if (rName !== '' && rName !== 'แถว' && !isNaN(cap)) {
+                                rows.push({ row: rName, capacity: cap });
+                            }
+                        }
+                    });
+                }
+                resolve(rows);
+            };
+
+            const script = document.createElement('script');
+            script.src = `https://docs.google.com/spreadsheets/d/${sheetId.trim()}/gviz/tq?tqx=responseHandler:${callbackName}&sheet=${encodeURIComponent(sheetName)}`;
+            
+            script.onerror = function() {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                reject(new Error('เชื่อมต่อไม่ได้ (ตรวจสอบอินเทอร์เน็ต หรือการตั้งค่าแชร์ไฟล์)'));
+            };
+            
+            document.body.appendChild(script);
+        });
+    }
+
+    async function getRoomData(roomName) {
+        const statusBox = document.getElementById('dataSourceStatus');
+
+        if (!GOOGLE_SHEET_ID) {
+            statusBox.className = "alert alert-warning py-2 px-3 small mb-2 rounded-3";
+            statusBox.innerHTML = `⚠️ <strong>โหมดข้อมูลจำลอง:</strong> ไม่ได้ระบุ Sheet ID`;
+            return mockRoomData[roomName] || [];
+        }
+        
+        try {
+            const rows = await fetchSheetDataJSONP(GOOGLE_SHEET_ID, roomName);
+
+            if (rows.length === 0) {
+                throw new Error(`ไม่พบข้อมูลในชีท "${roomName}"`);
+            }
+
+            statusBox.className = "alert alert-success py-2 px-3 small mb-2 rounded-3";
+            statusBox.innerHTML = `✅ ดึงข้อมูลจริงสำเร็จ: <strong>ห้อง ${roomName}</strong> (มีทั้งหมด ${rows.length} แถว)`;
+            return rows;
+
+        } catch (error) {
+            console.error(error);
+            statusBox.className = "alert alert-danger py-2 px-3 small mb-2 rounded-3";
+            statusBox.innerHTML = `❌ <strong>ดึงข้อมูลชีท "${roomName}" ไม่ได้:</strong> ${error.message} <em>(ใช้ข้อมูลจำลองแทน)</em>`;
+            return mockRoomData[roomName] || [];
+        }
+    }
+
+    document.getElementById('calcForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.activeElement.blur();
+
+        const calcBtn = document.getElementById('calcBtn');
+        calcBtn.disabled = true;
+        calcBtn.innerText = "⏳ กำลังคำนวณ...";
+
+        const roomName = document.getElementById('roomSelect').value;
+        const examSets = parseInt(document.getElementById('examSets').value);
+        const rowPattern = document.getElementById('rowPattern').value;
+        const totalStudents = parseInt(document.getElementById('studentCount').value);
+        const pagesPerCopy = parseInt(document.getElementById('pagesPerCopy').value);
+
+        const roomData = await getRoomData(roomName);
+        
+        calcBtn.disabled = false;
+        calcBtn.innerText = "คำนวณการจัดที่นั่งสอบ";
+
+        let remainingStudents = totalStudents;
+        let usedRowsCount = 0;
+        let assignedSet1 = 0;
+        let assignedSet2 = 0;
+
+        const allocationResult = roomData.map(item => {
+            const parity = getRowParity(item.row);
+            let isEligible = false;
+            let examSet = "-";
+            let assigned = 0;
+
+            if (examSets === 1) {
+                if (rowPattern === "all" || rowPattern === parity) {
+                    isEligible = true;
+                    examSet = "ชุด 1";
+                }
+            } else if (examSets === 2) {
+                isEligible = true;
+                if (parity === "odd") examSet = "ชุด 1";
+                if (parity === "even") examSet = "ชุด 2";
+            }
+
+            if (isEligible && remainingStudents > 0) {
+                assigned = Math.min(item.capacity, remainingStudents);
+                remainingStudents -= assigned;
+                if (assigned > 0) usedRowsCount++;
+
+                if (examSet === "ชุด 1") assignedSet1 += assigned;
+                if (examSet === "ชุด 2") assignedSet2 += assigned;
+            }
+
+            return {
+                rowName: item.row,
+                parityText: parity === "odd" ? "คี่" : "คู่",
+                capacity: item.capacity,
+                examSet: assigned > 0 ? examSet : "-",
+                assigned: assigned,
+                pages: assigned * pagesPerCopy,
+                setNumber: assigned > 0 ? (examSet === "ชุด 1" ? 1 : 2) : 0
+            };
+        });
+
+        const MAX_PAGES_PER_ENVELOPE = 600;
+        const pagesSet1 = assignedSet1 * pagesPerCopy;
+        const pagesSet2 = assignedSet2 * pagesPerCopy;
+        
+        const envSet1 = Math.ceil(pagesSet1 / MAX_PAGES_PER_ENVELOPE);
+        const envSet2 = Math.ceil(pagesSet2 / MAX_PAGES_PER_ENVELOPE);
+        const totalEnvelopes = envSet1 + envSet2;
+
+        renderResults({
+            totalRows: roomData.length,
+            usedRowsCount,
+            totalAssigned: assignedSet1 + assignedSet2,
+            remainingStudents,
+            totalEnvelopes,
+            envSet1,
+            envSet2,
+            examSets,
+            allocationResult
+        });
+    });
+
+    function renderResults(data) {
+        document.getElementById('resultSection').style.display = 'block';
+
+        const alertBox = document.getElementById('alertUnassigned');
+        if (data.remainingStudents > 0) {
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = `⚠️ <strong>ที่นั่งไม่พอ!</strong> เหลือนักศึกษายังไม่ได้ที่นั่ง <strong>${data.remainingStudents}</strong> คน`;
+        } else {
+            alertBox.style.display = 'none';
+        }
+
+        document.getElementById('sumRows').innerText = `${data.usedRowsCount}/${data.totalRows}`;
+        document.getElementById('sumStudents').innerText = `${data.totalAssigned.toLocaleString()}`;
+        document.getElementById('sumEnvelopes').innerText = `${data.totalEnvelopes} ซอง`;
+        
+        if (data.examSets === 2) {
+            document.getElementById('envelopeDetail').innerText = `(ชุด1: ${data.envSet1} | ชุด2: ${data.envSet2})`;
+            document.getElementById('legendSet2').style.display = 'inline-block';
+        } else {
+            document.getElementById('envelopeDetail').innerText = `(600 แผ่น/ซอง)`;
+            document.getElementById('legendSet2').style.display = 'none';
+        }
+
+        const visualMap = document.getElementById('visualMap');
+        const tableBody = document.getElementById('tableBody');
+        visualMap.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        // กรองเอาเฉพาะแถวที่มีการจัดข้อสอบลง (assigned > 0) เท่านั้น
+        const activeRows = data.allocationResult.filter(r => r.assigned > 0);
+
+        activeRows.forEach(r => {
+            let boxClass = r.setNumber === 1 ? 'row-set-1' : 'row-set-2';
+            let badgeClass = r.setNumber === 1 ? 'badge-set1' : 'badge-set2';
+
+            visualMap.innerHTML += `
+                <div class="col">
+                    <div class="row-box ${boxClass}">
+                        <div class="fw-bold small mb-1">แถว ${r.rowName}</div>
+                        <div><span class="badge ${badgeClass} mb-1">${r.examSet}</span></div>
+                        <div class="fs-5 fw-bold lh-1 mt-1">${r.assigned} <span class="small fw-normal text-muted">/${r.capacity}</span></div>
+                    </div>
+                </div>
+            `;
+
+            tableBody.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${r.rowName}</td>
+                    <td><span class="badge bg-light text-dark border">${r.parityText}</span></td>
+                    <td><span class="badge ${badgeClass}">${r.examSet}</span></td>
+                    <td class="fw-bold text-primary fs-6">${r.assigned} <small class="text-muted fw-normal">/${r.capacity}</small></td>
+                    <td>${r.pages.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+
+        setTimeout(() => {
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+</script>
+
+</body>
+</html>

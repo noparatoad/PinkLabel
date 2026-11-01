@@ -3,468 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pink Label System - ระบบคำนวณและจัดแผนผังข้อสอบ</title>
+    <title>Pink Label System - ระบบจัดแถวใบชมพูและจัดซองข้อสอบ</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --pink-dark: #ad1457;
-            --pink-main: #e83e8c;
-            --pink-bg: #fdf2f7;
-            --pink-soft: #fce4ec;
-            --purple-pink: #8e24aa;
-            --purple-soft: #f3e5f5;
-        }
+        :root { --pink-dark: #ad1457; --pink-main: #e83e8c; --pink-bg: #fdf2f7; --pink-soft: #fce4ec; --purple-pink: #8e24aa; }
         body { font-family: 'Sarabun', sans-serif; background-color: var(--pink-bg); color: #4a4a4a; }
-        .card { border-radius: 16px; box-shadow: 0 3px 12px rgba(214, 51, 132, 0.08); border: 1px solid #f8bbd0; }
+        .card { border-radius: 16px; box-shadow: 0 3px 12px rgba(214,51,132,0.08); border: 1px solid #f8bbd0; }
         .header-bg { background: linear-gradient(135deg, #d81b60, #ff6090); color: white; border-radius: 15px 15px 0 0; }
-        .form-select, .form-control { padding: 0.6rem 0.75rem; border-radius: 10px; border-color: #f48fb1; }
-        .form-select:focus, .form-control:focus { border-color: var(--pink-main); box-shadow: 0 0 0 0.25rem rgba(232, 62, 140, 0.2); }
+        .form-select, .form-control { border-radius: 10px; border-color: #f48fb1; }
+        .form-select:focus, .form-control:focus { border-color: var(--pink-main); box-shadow: 0 0 0 0.25rem rgba(232,62,140,0.2); }
         .btn-pink { background: linear-gradient(135deg, #e83e8c, #d81b60); border: none; color: white; }
-        .btn-pink:hover, .btn-pink:focus { background: linear-gradient(135deg, #c2185b, #ad1457); color: white; }
-        .btn-pink:disabled { background: #f48fb1; color: white; }
+        .btn-pink:hover { background: linear-gradient(135deg, #c2185b, #ad1457); color: white; }
+        .btn-outline-pink { border: 2px solid var(--pink-main); color: var(--pink-dark); background: white; }
+        .btn-outline-pink:hover { background: var(--pink-soft); color: var(--pink-dark); }
+        .nav-pills .nav-link { color: var(--pink-dark); background: white; border: 1px solid #f48fb1; border-radius: 12px; margin: 0 4px; font-weight: 700; }
+        .nav-pills .nav-link.active { background: linear-gradient(135deg, #e83e8c, #d81b60); color: white; border-color: transparent; }
         .text-pink-dark { color: var(--pink-dark) !important; }
         .text-pink-main { color: var(--pink-main) !important; }
-        .row-box { border: 2px solid #f48fb1; border-radius: 12px; padding: 10px 6px; text-align: center; background: white; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .row-box { border: 2px solid #f48fb1; border-radius: 12px; padding: 10px 6px; text-align: center; background: white; height: 100%; }
         .row-set-1 { border-color: var(--pink-main); background-color: #fff0f5; }
-        .row-set-2 { border-color: var(--purple-pink); background-color: var(--purple-soft); }
+        .row-set-2 { border-color: var(--purple-pink); background-color: #f3e5f5; }
         .badge-set1 { background-color: var(--pink-main); color: white; }
         .badge-set2 { background-color: var(--purple-pink); color: white; }
-        .badge-env { background-color: var(--pink-dark); color: white; }
+        .badge-spare { background-color: #ff8f00; color: white; }
         .env-card { border-left: 6px solid var(--pink-main); background-color: #fff9fb; }
         .table-pink-head { background-color: var(--pink-soft); color: var(--pink-dark); }
         .table-pink-highlight { background-color: #fff0f5 !important; color: var(--pink-dark) !important; }
-        @media (max-width: 576px) {
-            .container { padding-left: 10px; padding-right: 10px; }
-            .header-bg h2 { font-size: 1.35rem; }
-            .summary-box h3 { font-size: 1.25rem; }
-            .summary-box h6 { font-size: 0.75rem; }
-            .table-mobile { font-size: 0.8rem; }
-            .table-mobile th, .table-mobile td { padding: 0.4rem 0.2rem; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container py-2 py-md-4">
+    <!-- Header & Tabs -->
     <div class="card mb-3">
         <div class="header-bg p-3 p-md-4">
-            <h2 class="mb-1 fw-bold">🌸 Pink Label System 🌸</h2>
-            <p class="mb-0 opacity-90 small">ให้เราช่วยคำนวณแผนผังที่นั่งสอบและจัดซองข้อสอบสำหรับห้องหย่ายยยยยนะ :)</p>
+            <h3 class="mb-1 fw-bold">🌸 Pink Label & Envelope System</h3>
+            <p class="mb-0 opacity-90 small">ระบบจัดแถวเขียนใบชมพู และระบบคำนวณการจัดซองข้อสอบ</p>
         </div>
-        <div class="card-body p-3 p-md-4 bg-white" style="border-radius: 0 0 15px 15px;">
-            <form id="calcForm">
-                <div class="row g-2 g-md-3">
-                    <div class="col-12 col-md-4">
-                        <label class="form-label fw-bold mb-1 text-pink-dark">1.เลือกห้องสอบ</label>
-                        <select class="form-select" id="roomSelect" required>
-                            <option value="5406">5406 ว.4</option>
-                            <option value="หอประชุม">หอประชุม</option>
-                            <option value="รวท1">ร.วท.1</option>
-                            <option value="รวท2">ร.วท.2</option>
-                            <option value="ไววิทย์พุทธารี">ไววิทย์พุทธารี</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <label class="form-label fw-bold mb-1 text-pink-dark">2.จำนวนชุด</label>
-                        <select class="form-select" id="examSets" onchange="togglePatternOptions()">
-                            <option value="1">1 ชุด</option>
-                            <option value="2">2 ชุด (คี่/คู่)</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <label class="form-label fw-bold mb-1 text-pink-dark">3.การจัดลงแถว</label>
-                        <select class="form-select" id="rowPattern">
-                            <option value="all">ทุกแถว</option>
-                            <option value="odd">เฉพาะแถวคี่</option>
-                            <option value="even">เฉพาะแถวคู่</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-6 mt-2 mt-md-3">
-                        <label class="form-label fw-bold mb-1 text-pink-dark">4.จำนวนนักศึกษา</label>
-                        <input type="number" inputmode="numeric" class="form-control" id="studentCount" min="1" placeholder="ระบุจำนวนคน" required>
-                    </div>
-                    <div class="col-6 col-md-6 mt-2 mt-md-3">
-                        <label class="form-label fw-bold mb-1 text-pink-dark">5.จำนวนหน้าข้อสอบต่อชุด</label>
-                        <input type="number" inputmode="numeric" class="form-control" id="pagesPerCopy" min="1" max="500" placeholder="ระบุจำนวนแผ่น" required>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-text text-pink-main fw-bold small mt-0">
-                            * คำนวณซองข้อสอบบรรจุไม่เกิน 500 แผ่น/ซอง *
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3 mt-md-4">
-                    <button type="submit" class="btn btn-pink btn-lg w-100 fw-bold rounded-3 shadow-sm" id="calcBtn">
-                        🌸 คำนวณการจัดที่นั่งและซองข้อสอบ
+        <div class="card-body p-2 bg-white" style="border-radius: 0 0 15px 15px;">
+            <ul class="nav nav-pills nav-fill" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active py-2" id="tab1-btn" data-bs-toggle="pill" data-bs-target="#tab1-pane" type="button" role="tab">
+                        🏷️ 1. จัดแถวเขียนใบชมพู
                     </button>
-                </div>
-            </form>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link py-2" id="tab2-btn" data-bs-toggle="pill" data-bs-target="#tab2-pane" type="button" role="tab">
+                        💌 2. จัดซองข้อสอบ
+                    </button>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <!-- แถบแจ้งเตือนสถานะการดึงข้อมูล -->
-    <div id="dataSourceStatus" style="display: none;"></div>
-
-    <!-- ส่วนแสดงผลลัพธ์ -->
-    <div id="resultSection" style="display: none;">
-        <div id="alertUnassigned" class="alert alert-danger py-2 px-3 small mb-2 rounded-3" style="display: none;"></div>
-
-        <div class="row g-2 mb-3 summary-box">
-            <div class="col-4">
-                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
-                    <h6 class="text-muted mb-1">แถวที่ใช้</h6>
-                    <h3 class="fw-bold text-pink-dark mb-0" id="sumRows">0/0</h3>
-                </div>
+    <div class="tab-content">
+        <!-- ==================== แท็บ 1: จัดแถวเขียนใบชมพู ==================== -->
+        <div class="tab-pane fade show active" id="tab1-pane" role="tabpanel">
+            <div class="card mb-3 bg-white p-3 p-md-4">
+                <h5 class="fw-bold text-pink-dark mb-3">🏷️ ตั้งค่าการจัดแถวเขียนใบชมพู</h5>
+                <form id="calcRowForm">
+                    <div class="row g-2 g-md-3">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">1. เลือกห้องสอบ</label>
+                            <select class="form-select" id="roomSelect" required>
+                                <option value="5406">5406 ว.4</option>
+                                <option value="หอประชุม">หอประชุม</option>
+                                <option value="รวท1">ร.วท.1</option>
+                                <option value="รวท2">ร.วท.2</option>
+                                <option value="ไววิทย์พุทธารี">ไววิทย์พุทธารี</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">2. จำนวนชุดข้อสอบ</label>
+                            <select class="form-select" id="examSets" onchange="togglePatternOptions()">
+                                <option value="1">1 ชุด</option>
+                                <option value="2">2 ชุด (คี่/คู่)</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">3. การจัดลงแถว</label>
+                            <select class="form-select" id="rowPattern">
+                                <option value="all">ทุกแถว</option>
+                                <option value="odd">เฉพาะแถวคี่</option>
+                                <option value="even">เฉพาะแถวคู่</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">4. จำนวนนักศึกษา (คน)</label>
+                            <input type="number" inputmode="numeric" class="form-control" id="studentCountTab1" min="1" placeholder="ระบุจำนวนคน" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-pink btn-lg w-100 fw-bold rounded-3 mt-3" id="calcRowBtn">
+                        🌸 คำนวณการจัดแถวเขียนใบชมพู
+                    </button>
+                </form>
             </div>
-            <div class="col-4">
-                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
-                    <h6 class="text-muted mb-1">จัดที่นั่งได้</h6>
-                    <h3 class="fw-bold text-pink-main mb-0" id="sumStudents">0</h3>
+
+            <div id="dataSourceStatus" style="display: none;"></div>
+
+            <div id="resultTab1" style="display: none;">
+                <div id="alertUnassigned" class="alert alert-danger py-2 px-3 small mb-2" style="display: none;"></div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="card p-2 text-center bg-white">
+                            <small class="text-muted">แถวที่ใช้ / ทั้งหมด</small>
+                            <h4 class="fw-bold text-pink-dark mb-0" id="sumRows">0/0</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card p-2 text-center bg-white">
+                            <small class="text-muted">จัดที่นั่งได้ (คน)</small>
+                            <h4 class="fw-bold text-pink-main mb-0" id="sumStudents">0</h4>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-4">
-                <div class="card p-2 p-md-3 text-center bg-white h-100 justify-content-center">
-                    <h6 class="text-muted mb-1">ใช้ซองข้อสอบ</h6>
-                    <h3 class="fw-bold text-pink-dark mb-0" id="sumEnvelopes">0</h3>
-                    <small id="envelopeDetail" class="text-muted" style="font-size: 0.7rem;"></small>
+
+                <button type="button" class="btn btn-outline-pink w-100 fw-bold py-2 mb-3 rounded-3" onclick="sendToEnvelopeTab()">
+                    💌 นำผลการจัดแถวนี้ ไปคำนวณ "จัดซองข้อสอบ" ต่อ ➡️
+                </button>
+
+                <div class="card mb-3 p-3 bg-white">
+                    <h6 class="fw-bold mb-2 text-pink-dark">🏷️ ป้ายกำกับแถวที่นั่งสอบ (สำหรับเขียนใบชมพู)</h6>
+                    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2" id="visualMap"></div>
+                </div>
+
+                <div class="card p-3 mb-4 bg-white">
+                    <h6 class="fw-bold mb-2 text-pink-dark">📑 ตารางสรุปจำนวนข้อสอบในแต่ละแถว</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center align-middle mb-0">
+                            <thead class="table-pink-head">
+                                <tr><th>แถว</th><th>ประเภท</th><th>ความจุ</th><th>ชุด</th><th class="table-pink-highlight">วางข้อสอบ (ชุด)</th></tr>
+                            </thead>
+                            <tbody id="tableBodyTab1"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- รายละเอียดการจัดซองข้อสอบ -->
-        <div class="card mb-3 p-3 p-md-4 bg-white">
-            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                <h6 class="fw-bold mb-0 text-pink-dark">💌 รายละเอียดการบรรจุซองข้อสอบ (เรียงตามแถว)</h6>
-                <small class="text-pink-main fw-semibold" id="maxCopiesPerEnvText"></small>
-            </div>
-            <div class="row row-cols-1 row-cols-md-2 g-2 mt-1" id="envelopeMap"></div>
-        </div>
+        <!-- ==================== แท็บ 2: จัดซองข้อสอบ ==================== -->
+        <div class="tab-pane fade" id="tab2-pane" role="tabpanel">
+            <div class="card mb-3 bg-white p-3 p-md-4">
+                <h5 class="fw-bold text-pink-dark mb-3">💌 ตั้งค่าการจัดซองข้อสอบ (สูงสุด 500 แผ่น/ซอง)</h5>
+                <form id="calcEnvForm">
+                    <div class="mb-3 p-2 rounded-3" style="background-color: var(--pink-soft);">
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">
+                                <div class="form-check bg-white p-2 ps-4 rounded-3 border">
+                                    <input class="form-check-input" type="radio" name="envMode" id="modeSmallRoom" value="small" checked onchange="toggleEnvMode()">
+                                    <label class="form-check-label fw-bold text-pink-dark" for="modeSmallRoom">
+                                        🏫 ห้องสอบขนาดเล็ก (คำนวณจาก นศ. + สำรอง)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-check bg-white p-2 ps-4 rounded-3 border">
+                                    <input class="form-check-input" type="radio" name="envMode" id="modeLargeRoom" value="large" onchange="toggleEnvMode()">
+                                    <label class="form-check-label fw-bold text-pink-dark" for="modeLargeRoom">
+                                        🏛️ ห้องสอบใหญ่จัดตามแถว (ดึงจากแท็บ 1)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- แผนผังป้ายกำกับ Pink Labels -->
-        <div class="card mb-3 p-3 p-md-4 bg-white">
-            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                <h6 class="fw-bold mb-1 text-pink-dark">🏷️ ป้ายกำกับแถวที่นั่งสอบ (Pink Labels)</h6>
-                <div>
-                    <span class="badge badge-set1 me-1">ชุดที่ 1</span>
-                    <span class="badge badge-set2" id="legendSet2" style="display:none;">ชุดที่ 2</span>
+                    <div id="largeRoomStatus" class="alert py-2 px-3 small mb-3" style="display: none;"></div>
+
+                    <div class="row g-2 g-md-3">
+                        <div class="col-12 col-md-4" id="smallRoomStudentBox">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">1. จำนวนนักศึกษา (คน)</label>
+                            <input type="number" inputmode="numeric" class="form-control" id="envStudentCount" min="1" placeholder="ระบุจำนวน นศ." required>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">2. ข้อสอบสำรอง (ชุด)</label>
+                            <input type="number" inputmode="numeric" class="form-control" id="envSpareCount" min="0" value="0" required>
+                            <small class="text-muted" style="font-size:0.75rem;">* ใส่ใน <strong>ซองที่ 1</strong> เสมอ</small>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-bold mb-1 text-pink-dark">3. จำนวนหน้าต่อชุด (แผ่น)</label>
+                            <input type="number" inputmode="numeric" class="form-control" id="envPagesPerCopy" min="1" max="500" placeholder="แผ่น/ชุด" required>
+                            <small class="text-muted" style="font-size:0.75rem;">* ไม่เกิน 500 แผ่น/ซอง</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-pink btn-lg w-100 fw-bold rounded-3 mt-3">
+                        💌 คำนวณการจัดซองข้อสอบ
+                    </button>
+                </form>
+            </div>
+
+            <div id="resultTab2" style="display: none;">
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <div class="card p-2 text-center bg-white h-100 justify-content-center">
+                            <small class="text-muted">ข้อสอบรวม</small>
+                            <h5 class="fw-bold text-pink-dark mb-0" id="sumEnvCopies">0 ชุด</h5>
+                            <small class="text-muted" id="sumEnvCopiesDetail" style="font-size:0.7rem;"></small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-2 text-center bg-white h-100 justify-content-center">
+                            <small class="text-muted">กระดาษรวม</small>
+                            <h5 class="fw-bold text-pink-main mb-0" id="sumEnvPages">0 แผ่น</h5>
+                            <small class="text-muted" id="maxPerEnvDetail" style="font-size:0.7rem;"></small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-2 text-center bg-white h-100 justify-content-center">
+                            <small class="text-muted">จำนวนซองที่ใช้</small>
+                            <h5 class="fw-bold text-pink-dark mb-0" id="sumEnvelopes">0 ซอง</h5>
+                            <small class="text-muted" style="font-size:0.7rem;">(Max 500 แผ่น)</small>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2" id="visualMap"></div>
-        </div>
 
-        <!-- ตารางรายละเอียด -->
-        <div class="card p-3 p-md-4 mb-4 bg-white">
-            <h6 class="fw-bold mb-2 text-pink-dark">📑 ตารางสรุปการวางข้อสอบในแต่ละแถว</h6>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover text-center align-middle mb-0 table-mobile">
-                    <thead class="table-pink-head">
-                        <tr>
-                            <th>แถว</th>
-                            <th>ประเภท</th>
-                            <th>ชุดข้อสอบ</th>
-                            <th class="table-pink-highlight">จำนวนที่ใช้</th>
-                            <th>กระดาษ (แผ่น)</th>
-                            <th>อยู่ในซองที่</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+                <div class="card mb-4 p-3 bg-white">
+                    <h6 class="fw-bold mb-2 text-pink-dark">💌 รายละเอียดการบรรจุแต่ละซอง (ซองที่ 1 มีสำรองเสมอ)</h6>
+                    <div class="row row-cols-1 row-cols-md-2 g-3" id="envelopeMap"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const GOOGLE_SHEET_ID = "1MFl2071MfgFMbEYDytGoPsw1Dx9d5tJxx3V9R_Bvcf4"; 
-    const MAX_PAGES_PER_ENVELOPE = 500;
+    const GOOGLE_SHEET_ID = "1MFl2071MfgFMbEYDytGoPsw1Dx9d5tJxx3V9R_Bvcf4";
+    const MAX_PAGES = 500;
+    let savedRowAllocation = null;
+    let savedRoomName = "";
+    let savedTotalAssigned = 0;
 
     function togglePatternOptions() {
         const examSets = document.getElementById('examSets').value;
         const rowPattern = document.getElementById('rowPattern');
-        if (examSets === "2") {
-            rowPattern.value = "all";
-            rowPattern.disabled = true;
-        } else {
-            rowPattern.disabled = false;
-        }
+        if (examSets === "2") { rowPattern.value = "all"; rowPattern.disabled = true; }
+        else { rowPattern.disabled = false; }
     }
 
     function getRowParity(rowName) {
         rowName = String(rowName).trim();
         if (rowName.includes("เสริม") || rowName.includes("พิเศษ")) {
-            if (rowName.includes("1")) return "even"; // แถวเสริม 1 = คู่
-            if (rowName.includes("2")) return "odd";  // แถวเสริม 2 = คี่
-            return "even";
+            return rowName.includes("2") ? "odd" : "even";
         }
         const num = parseInt(rowName.replace(/\D/g, ''));
         return (!isNaN(num) && num % 2 === 0) ? "even" : "odd";
-    }
-
-    async function fetchSheetDataCSV(sheetId, sheetName) {
-        if (!sheetId || sheetId.trim() === "") throw new Error("ไม่ได้ระบุรหัส Google Sheet ID");
-        const url = `https://docs.google.com/spreadsheets/d/${sheetId.trim()}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`เชื่อมต่อล้มเหลว (HTTP ${response.status})`);
-        
-        const csvText = await response.text();
-        if (csvText.trim().startsWith("<!DOCTYPE html>") || csvText.includes("<html")) {
-            throw new Error(`ตั้งค่าแชร์ไฟล์ไม่ถูกต้อง หรือไม่พบชีท "${sheetName}"`);
-        }
-
-        const lines = csvText.split(/\r?\n/);
-        const rows = [];
-        let extraCounter = 1;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
-            if (parts.length >= 2) {
-                let rName = parts[0];
-                const cap = parseInt(parts[1]);
-                if (isNaN(cap)) continue;
-                if (rName === '' || rName.toLowerCase() === 'null') {
-                    rName = `แถวเสริม ${extraCounter++}`;
-                }
-                rows.push({ row: rName, capacity: cap });
-            }
-        }
-        return rows;
     }
 
     async function getRoomData(roomName) {
         const statusBox = document.getElementById('dataSourceStatus');
         statusBox.style.display = 'block';
         try {
-            const rows = await fetchSheetDataCSV(GOOGLE_SHEET_ID, roomName);
-            if (rows.length === 0) throw new Error(`ไม่พบข้อมูลในชีท "${roomName}"`);
+            const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(roomName)}`;
+            const res = await fetch(url);
+            const csv = await res.text();
+            if (csv.includes("<html")) throw new Error("ตั้งค่าแชร์ไฟล์ไม่ถูกต้อง หรือไม่พบชีท");
 
-            const extraRows = rows.filter(r => r.row.includes("เสริม")).map(r => r.row);
-            const extraText = extraRows.length > 0 ? ` <span class="badge badge-set1 ms-1">พบ ${extraRows.join(', ')}</span>` : '';
-
-            statusBox.className = "alert py-2 px-3 small mb-3 rounded-3 shadow-sm";
+            const rows = [];
+            let extra = 1;
+            csv.split(/\r?\n/).forEach(line => {
+                const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
+                if (parts.length >= 2 && !isNaN(parseInt(parts[1]))) {
+                    let rName = parts[0] || `แถวเสริม ${extra++}`;
+                    rows.push({ row: rName, capacity: parseInt(parts[1]) });
+                }
+            });
+            statusBox.className = "alert py-2 px-3 small mb-3";
             statusBox.style.backgroundColor = "#fce4ec";
-            statusBox.style.borderColor = "#f48fb1";
-            statusBox.style.color = "#880e4f";
-            statusBox.innerHTML = `🌸 ดึงข้อมูลสำเร็จ: <strong>ห้อง ${roomName}</strong> มีทั้งหมด ${rows.length} แถว ${extraText}`;
+            statusBox.innerHTML = `🌸 ดึงข้อมูลสำเร็จ: <strong>ห้อง ${roomName}</strong> (${rows.length} แถว)`;
             return rows;
-        } catch (error) {
-            statusBox.className = "alert alert-danger py-3 px-3 mb-3 rounded-3 shadow-sm";
-            statusBox.innerHTML = `<h6 class="fw-bold mb-1">❌ โหลดข้อมูลจาก Google Sheet ไม่ได้</h6><div class="small"><strong>สาเหตุ:</strong> ${error.message}</div>`;
+        } catch (err) {
+            statusBox.className = "alert alert-danger py-2 px-3 small mb-3";
+            statusBox.innerHTML = `❌ โหลดข้อมูลไม่ได้: ${err.message}`;
             return null;
         }
     }
 
-    document.getElementById('calcForm').addEventListener('submit', async function(e) {
+    // คำนวณแท็บ 1
+    document.getElementById('calcRowForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        document.activeElement.blur();
-
-        const pagesPerCopy = parseInt(document.getElementById('pagesPerCopy').value);
-        if (pagesPerCopy > MAX_PAGES_PER_ENVELOPE) {
-            alert(`จำนวนแผ่นต่อชุด (${pagesPerCopy}) เกินความจุซองสูงสุด (${MAX_PAGES_PER_ENVELOPE} แผ่น)`);
-            return;
-        }
-
-        const calcBtn = document.getElementById('calcBtn');
-        calcBtn.disabled = true;
-        calcBtn.innerText = "⏳ กำลังดึงข้อมูลและคำนวณ...";
+        const btn = document.getElementById('calcRowBtn');
+        btn.disabled = true; btn.innerText = "⏳ กำลังคำนวณ...";
 
         const roomName = document.getElementById('roomSelect').value;
         const examSets = parseInt(document.getElementById('examSets').value);
         const rowPattern = document.getElementById('rowPattern').value;
-        const totalStudents = parseInt(document.getElementById('studentCount').value);
+        let rem = parseInt(document.getElementById('studentCountTab1').value);
 
         const roomData = await getRoomData(roomName);
-        calcBtn.disabled = false;
-        calcBtn.innerText = "🌸 คำนวณการจัดที่นั่งและซองข้อสอบ";
+        btn.disabled = false; btn.innerText = "🌸 คำนวณการจัดแถวเขียนใบชมพู";
+        if (!roomData) return;
 
-        if (!roomData) {
-            document.getElementById('resultSection').style.display = 'none';
-            return;
-        }
-
-        let remainingStudents = totalStudents;
-        let usedRowsCount = 0;
-        let totalAssigned = 0;
-
-        // 1. คำนวณการจัดที่นั่งลงแต่ละแถว
-        const allocationResult = roomData.map(item => {
+        let used = 0, totalAssigned = 0;
+        const result = roomData.map(item => {
             const parity = getRowParity(item.row);
-            let isEligible = false;
-            let examSet = "-";
-            let assigned = 0;
-
-            if (examSets === 1) {
-                if (rowPattern === "all" || rowPattern === parity) {
-                    isEligible = true;
-                    examSet = "ชุดที่ 1";
-                }
-            } else {
-                isEligible = true;
-                examSet = (parity === "odd") ? "ชุดที่ 1" : "ชุดที่ 2";
-            }
-
-            if (isEligible && remainingStudents > 0) {
-                assigned = Math.min(item.capacity, remainingStudents);
-                remainingStudents -= assigned;
-                if (assigned > 0) {
-                    usedRowsCount++;
-                    totalAssigned += assigned;
-                }
-            }
-
-            return {
-                rowName: item.row,
-                parityText: parity === "odd" ? "แถวคี่" : "แถวคู่",
-                capacity: item.capacity,
-                examSet: assigned > 0 ? examSet : "-",
-                assigned: assigned,
-                pages: assigned * pagesPerCopy,
-                setNumber: assigned > 0 ? (examSet === "ชุดที่ 1" ? 1 : 2) : 0,
-                envelopesUsed: []
-            };
+            let ok = (examSets === 1) ? (rowPattern === "all" || rowPattern === parity) : true;
+            let set = (examSets === 1) ? "ชุดที่ 1" : (parity === "odd" ? "ชุดที่ 1" : "ชุดที่ 2");
+            let assigned = (ok && rem > 0) ? Math.min(item.capacity, rem) : 0;
+            rem -= assigned;
+            if (assigned > 0) { used++; totalAssigned += assigned; }
+            return { rowName: item.row, parityText: parity === "odd" ? "แถวคี่" : "แถวคู่", capacity: item.capacity, examSet: assigned > 0 ? set : "-", assigned, setNum: assigned > 0 ? (set === "ชุดที่ 1" ? 1 : 2) : 0 };
         });
 
-        // 2. บรรจุซองเรียงตามลำดับแถว (ไม่แยกซองตามชุดข้อสอบ และไม่แยกแถวเดียวกันคนละซอง)
-        const maxCopiesPerEnv = Math.floor(MAX_PAGES_PER_ENVELOPE / pagesPerCopy);
-        let envelopesList = [];
-        let envCounter = 1;
-        let currentEnv = null;
+        savedRowAllocation = result.filter(r => r.assigned > 0);
+        savedRoomName = roomName;
+        savedTotalAssigned = totalAssigned;
 
-        const activeRows = allocationResult.filter(r => r.assigned > 0);
-        activeRows.forEach(row => {
-            const rowPages = row.assigned * pagesPerCopy;
+        document.getElementById('resultTab1').style.display = 'block';
+        const alertBox = document.getElementById('alertUnassigned');
+        alertBox.style.display = rem > 0 ? 'block' : 'none';
+        alertBox.innerHTML = `⚠️ ที่นั่งไม่พอ! เหลือนักศึกษา <strong>${rem}</strong> คน`;
 
-            if (rowPages <= MAX_PAGES_PER_ENVELOPE) {
-                if (!currentEnv || (currentEnv.pages + rowPages) > MAX_PAGES_PER_ENVELOPE) {
-                    currentEnv = { envNo: envCounter++, copies: 0, pages: 0, items: [] };
-                    envelopesList.push(currentEnv);
-                }
-                currentEnv.copies += row.assigned;
-                currentEnv.pages += rowPages;
-                currentEnv.items.push({
-                    rowName: row.rowName, examSet: row.examSet, setNumber: row.setNumber,
-                    copies: row.assigned, pages: rowPages, isOversize: false
-                });
-                row.envelopesUsed.push({ envNo: currentEnv.envNo, copies: row.assigned });
-            } else {
-                let copiesLeft = row.assigned;
-                while (copiesLeft > 0) {
-                    currentEnv = { envNo: envCounter++, copies: 0, pages: 0, items: [] };
-                    envelopesList.push(currentEnv);
-                    let take = Math.min(copiesLeft, maxCopiesPerEnv);
-                    currentEnv.copies += take;
-                    currentEnv.pages += take * pagesPerCopy;
-                    currentEnv.items.push({
-                        rowName: row.rowName, examSet: row.examSet, setNumber: row.setNumber,
-                        copies: take, pages: take * pagesPerCopy, isOversize: true
-                    });
-                    row.envelopesUsed.push({ envNo: currentEnv.envNo, copies: take });
-                    copiesLeft -= take;
-                }
-            }
-        });
+        document.getElementById('sumRows').innerText = `${used} / ${roomData.length}`;
+        document.getElementById('sumStudents').innerText = totalAssigned.toLocaleString();
 
-        renderResults({
-            totalRows: roomData.length, usedRowsCount, totalAssigned,
-            remainingStudents, totalEnvelopes: envelopesList.length,
-            examSets, allocationResult, envelopesList
+        const vMap = document.getElementById('visualMap');
+        const tBody = document.getElementById('tableBodyTab1');
+        vMap.innerHTML = ''; tBody.innerHTML = '';
+
+        savedRowAllocation.forEach(r => {
+            const bClass = r.setNum === 1 ? 'badge-set1' : 'badge-set2';
+            const rClass = r.setNum === 1 ? 'row-set-1' : 'row-set-2';
+            const dName = r.rowName.includes("แถว") ? r.rowName : `แถว ${r.rowName}`;
+            vMap.innerHTML += `<div class="col"><div class="row-box ${rClass}"><div class="fw-bold small text-pink-dark">${dName}</div><div><span class="badge ${bClass} my-1">${r.examSet}</span></div><div class="fs-5 fw-bold text-pink-dark">${r.assigned} ชุด</div><div class="text-muted" style="font-size:0.7rem;">(จุ ${r.capacity})</div></div></div>`;
+            tBody.innerHTML += `<tr><td class="fw-bold">${r.rowName}</td><td>${r.parityText}</td><td>${r.capacity}</td><td><span class="badge ${bClass}">${r.examSet}</span></td><td class="fw-bold text-pink-main table-pink-highlight">${r.assigned}</td></tr>`;
         });
     });
 
-    function renderResults(data) {
-        document.getElementById('resultSection').style.display = 'block';
+    function sendToEnvelopeTab() {
+        document.getElementById('modeLargeRoom').checked = true;
+        toggleEnvMode();
+        bootstrap.Tab.getOrCreateInstance(document.getElementById('tab2-btn')).show();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        const alertBox = document.getElementById('alertUnassigned');
-        if (data.remainingStudents > 0) {
-            alertBox.style.display = 'block';
-            alertBox.innerHTML = `⚠️ <strong>ที่นั่งไม่พอ!</strong> เหลือนักศึกษายังไม่ได้ที่นั่ง <strong>${data.remainingStudents}</strong> คน`;
+    function toggleEnvMode() {
+        const isLarge = document.getElementById('modeLargeRoom').checked;
+        const sBox = document.getElementById('smallRoomStudentBox');
+        const sInput = document.getElementById('envStudentCount');
+        const stBox = document.getElementById('largeRoomStatus');
+
+        if (isLarge) {
+            sBox.style.display = 'none'; sInput.required = false; stBox.style.display = 'block';
+            if (savedRowAllocation && savedRowAllocation.length > 0) {
+                stBox.className = "alert alert-success py-2 px-3 small mb-3";
+                stBox.innerHTML = `✅ ดึงข้อมูลจากแท็บ 1 แล้ว: <strong>ห้อง ${savedRoomName}</strong> (นักศึกษา ${savedTotalAssigned} คน จาก ${savedRowAllocation.length} แถว)`;
+            } else {
+                stBox.className = "alert alert-warning py-2 px-3 small mb-3";
+                stBox.innerHTML = `⚠️ กรุณาคำนวณการจัดแถวใน <strong>แท็บที่ 1</strong> ก่อนครับ`;
+            }
         } else {
-            alertBox.style.display = 'none';
+            sBox.style.display = 'block'; sInput.required = true; stBox.style.display = 'none';
+        }
+    }
+
+    // คำนวณแท็บ 2 (จัดซอง + สำรองอยู่ซอง 1 เสมอ)
+    document.getElementById('calcEnvForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const isLarge = document.getElementById('modeLargeRoom').checked;
+        const spareCopies = parseInt(document.getElementById('envSpareCount').value) || 0;
+        const pagesPerCopy = parseInt(document.getElementById('envPagesPerCopy').value);
+        const maxCopiesPerEnv = Math.floor(MAX_PAGES / pagesPerCopy);
+
+        if (maxCopiesPerEnv < 1) { alert("จำนวนหน้าต่อชุดเกิน 500 แผ่น!"); return; }
+        if (isLarge && (!savedRowAllocation || savedRowAllocation.length === 0)) {
+            alert("กรุณาคำนวณการจัดแถวในแท็บที่ 1 ก่อนครับ"); return;
         }
 
-        document.getElementById('sumRows').innerText = `${data.usedRowsCount}/${data.totalRows}`;
-        document.getElementById('sumStudents').innerText = `${data.totalAssigned.toLocaleString()}`;
-        document.getElementById('sumEnvelopes').innerText = `${data.totalEnvelopes} ซอง`;
-        document.getElementById('envelopeDetail').innerText = `(เรียงตามแถว ไม่เกิน 500 แผ่น/ซอง)`;
-        document.getElementById('legendSet2').style.display = (data.examSets === 2) ? 'inline-block' : 'none';
-        document.getElementById('maxCopiesPerEnvText').innerText = `(เรียงตามแถว ไม่แยกชุด • สูงสุด 500 แผ่น/ซอง)`;
+        // สร้างคิวรายการข้อสอบ โดยใส่ "ข้อสอบสำรอง" เป็นลำดับแรกเสมอ (เพื่อให้ลงซองที่ 1 เสมอ)
+        const queue = [];
+        if (spareCopies > 0) {
+            queue.push({ label: "ข้อสอบสำรอง", copies: spareCopies, isSpare: true, setText: "สำรอง" });
+        }
 
-        const envelopeMap = document.getElementById('envelopeMap');
-        const visualMap = document.getElementById('visualMap');
-        const tableBody = document.getElementById('tableBody');
-        envelopeMap.innerHTML = '';
-        visualMap.innerHTML = '';
-        tableBody.innerHTML = '';
+        let studentCopies = 0;
+        if (isLarge) {
+            studentCopies = savedTotalAssigned;
+            savedRowAllocation.forEach(r => {
+                const dName = r.rowName.includes("แถว") ? r.rowName : `แถว ${r.rowName}`;
+                queue.push({ label: dName, copies: r.assigned, isSpare: false, setText: r.examSet });
+            });
+        } else {
+            studentCopies = parseInt(document.getElementById('envStudentCount').value);
+            queue.push({ label: "ข้อสอบนักศึกษา", copies: studentCopies, isSpare: false, setText: "ปกติ" });
+        }
 
-        // 1. การ์ดซองข้อสอบ
-        data.envelopesList.forEach(env => {
-            let itemsHtml = env.items.map(item => {
-                const dispRow = item.rowName.includes("แถว") ? item.rowName : `แถว ${item.rowName}`;
-                const bClass = item.setNumber === 1 ? 'badge-set1' : 'badge-set2';
-                const warn = item.isOversize ? `<span class="badge bg-danger ms-1">เกิน 500 แผ่น</span>` : '';
-                return `<li class="list-group-item d-flex justify-content-between align-items-center px-2 py-1 bg-transparent border-0">
-                    <div><span class="badge ${bClass} me-1">${item.examSet}</span> <strong>${dispRow}</strong> ${warn}</div>
-                    <span class="text-pink-dark fw-bold">${item.copies} ชุด <small class="text-muted fw-normal">(${item.pages} แผ่น)</small></span>
+        // บรรจุลงซองทีละซอง (ซองละไม่เกิน maxCopiesPerEnv ชุด / 500 แผ่น)
+        const envelopes = [];
+        let curEnv = { number: 1, copies: 0, pages: 0, items: [] };
+
+        queue.forEach(item => {
+            let rem = item.copies;
+            while (rem > 0) {
+                let space = maxCopiesPerEnv - curEnv.copies;
+                if (space === 0) {
+                    envelopes.push(curEnv);
+                    curEnv = { number: envelopes.length + 1, copies: 0, pages: 0, items: [] };
+                    space = maxCopiesPerEnv;
+                }
+                let take = Math.min(rem, space);
+                curEnv.copies += take;
+                curEnv.pages += take * pagesPerCopy;
+                curEnv.items.push({ label: item.label, copies: take, pages: take * pagesPerCopy, isSpare: item.isSpare, setText: item.setText });
+                rem -= take;
+            }
+        });
+        if (curEnv.copies > 0) envelopes.push(curEnv);
+
+        // แสดงผลแท็บ 2
+        const totalCopies = studentCopies + spareCopies;
+        document.getElementById('resultTab2').style.display = 'block';
+        document.getElementById('sumEnvCopies').innerText = `${totalCopies.toLocaleString()} ชุด`;
+        document.getElementById('sumEnvCopiesDetail').innerText = `(นศ. ${studentCopies} + สำรอง ${spareCopies})`;
+        document.getElementById('sumEnvPages').innerText = `${(totalCopies * pagesPerCopy).toLocaleString()} แผ่น`;
+        document.getElementById('maxPerEnvDetail').innerText = `(ซองละไม่เกิน ${maxCopiesPerEnv} ชุด)`;
+        document.getElementById('sumEnvelopes').innerText = `${envelopes.length} ซอง`;
+
+        const envMap = document.getElementById('envelopeMap');
+        envMap.innerHTML = '';
+        envelopes.forEach(env => {
+            const listHtml = env.items.map(it => {
+                const bClass = it.isSpare ? 'badge-spare' : (it.setText === 'ชุดที่ 2' ? 'badge-set2' : 'badge-set1');
+                return `<li class="list-group-item d-flex justify-content-between align-items-center px-2 py-1 bg-transparent">
+                    <div><span class="fw-bold text-pink-dark">${it.label}</span> <span class="badge ${bClass} ms-1">${it.setText}</span></div>
+                    <div><span class="fw-bold text-pink-main">${it.copies} ชุด</span> <small class="text-muted">(${it.pages} แผ่น)</small></div>
                 </li>`;
             }).join('');
 
-            envelopeMap.innerHTML += `
-                <div class="col">
-                    <div class="card env-card h-100 shadow-sm">
-                        <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-between">
-                            <div>
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2" style="border-color:#f8bbd0!important;">
-                                    <h6 class="fw-bold mb-0 text-pink-dark">💌 ซองที่ ${env.envNo}</h6>
-                                    <span class="badge badge-env">รวม ${env.items.length} แถว</span>
-                                </div>
-                                <ul class="list-group list-group-flush small mb-2">${itemsHtml}</ul>
-                            </div>
-                            <div class="text-end bg-white p-2 rounded border small mt-2" style="border-color:#f8bbd0!important;">
-                                รวมในซองนี้: <strong class="text-pink-main fs-6">${env.copies} ชุด</strong> <span class="text-muted">(${env.pages}/500 แผ่น)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+            envMap.innerHTML += `<div class="col"><div class="card env-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                    <span class="fw-bold fs-5 text-pink-dark">💌 ซองที่ ${env.number}</span>
+                    <span class="badge bg-dark">${env.copies} ชุด (${env.pages} / 500 แผ่น)</span>
+                </div>
+                <ul class="list-group list-group-flush small">${listHtml}</ul>
+            </div></div>`;
         });
-
-        // 2. ป้ายกำกับ Pink Labels และ ตาราง
-        const activeRows = data.allocationResult.filter(r => r.assigned > 0);
-        activeRows.forEach(r => {
-            const boxClass = r.setNumber === 1 ? 'row-set-1' : 'row-set-2';
-            const badgeClass = r.setNumber === 1 ? 'badge-set1' : 'badge-set2';
-            const dispName = r.rowName.includes("แถว") ? r.rowName : `แถว ${r.rowName}`;
-            const envShort = r.envelopesUsed.map(e => `ซองที่ ${e.envNo}`).join(', ');
-            const envBadges = r.envelopesUsed.map(e => `<span class="badge badge-env">ซองที่ ${e.envNo}</span>`).join(' ');
-
-            visualMap.innerHTML += `
-                <div class="col">
-                    <div class="row-box ${boxClass}">
-                        <div class="fw-bold small mb-1 text-pink-dark">${dispName}</div>
-                        <div><span class="badge ${badgeClass} mb-1">${r.examSet}</span></div>
-                        <div class="fs-5 fw-bold lh-1 my-1 text-pink-dark">${r.assigned} ชุด</div>
-                        <div class="text-muted" style="font-size:0.7rem;">(จุ ${r.capacity} ที่นั่ง)</div>
-                        <div class="mt-1"><span class="badge badge-env" style="font-size:0.7rem;">${envShort}</span></div>
-                    </div>
-                </div>`;
-
-            tableBody.innerHTML += `
-                <tr>
-                    <td class="fw-bold text-pink-dark">${r.rowName}</td>
-                    <td><span class="badge bg-white text-pink-dark border" style="border-color:#f48fb1!important;">${r.parityText}</span></td>
-                    <td><span class="badge ${badgeClass}">${r.examSet}</span></td>
-                    <td class="fw-bold text-pink-main fs-6 table-pink-highlight">${r.assigned} ชุด <small class="text-muted fw-normal">/${r.capacity}</small></td>
-                    <td>${r.pages.toLocaleString()}</td>
-                    <td>${envBadges}</td>
-                </tr>`;
-        });
-
-        setTimeout(() => {
-            document.getElementById('dataSourceStatus').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-    }
+    });
 </script>
 </body>
 </html>
